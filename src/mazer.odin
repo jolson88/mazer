@@ -96,7 +96,7 @@ do_battle :: proc() {
 init :: proc() {
 	sw, sh = f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight())
 
-	planet.pos        = rl.Vector2{sw*0.05, sh*0.9}
+	planet.pos        = rl.Vector2{sw/2, sh/2}
 	planet.color      = rl.DARKGREEN
 	planet.population = 6_000_000_000
 	planet.radius     = 30
@@ -104,9 +104,9 @@ init :: proc() {
 	player.angle         = 5.5
 	player.color         = rl.BLUE
 	player.distance      = 40
-	player.engine_torque = 30_000
+	player.engine_torque = 12_000
 	player.friction      = 1.8
-	player.mass	         = 7_000
+	player.mass	         = 2_000
 	player.score		 = 0
 }
 
