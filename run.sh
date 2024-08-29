@@ -1,0 +1,1 @@
+odin run src -debug -vet -out:mazer.bin

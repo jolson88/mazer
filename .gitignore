@@ -1,0 +1,7 @@
+**/*.bin
+**/*.exe
+**/*.dSYM
+**/*.zip
+**/playground*
+**/rl-examples*
+**/.DS_Store
