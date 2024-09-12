@@ -13,6 +13,8 @@ Battle :: struct {
 }
 
 Game :: struct {
+	sw, sh: f32,
+
 	battle: Battle,
 	player: Ship,
 	rem_pop: i64, 		// The remaining population on the planet for this game
@@ -37,23 +39,23 @@ Ship :: struct {
 // variables
 MAX_POP_DIGITS   :: 12
 MAX_SCORE_DIGITS :: 8
-sw, sh: f32
 hud_font: rl.Font
 hud_font_size: i32 = 36
 
-game: Game
-
 // procedures
-do_battle :: proc() {
+do_battle :: proc(game: ^Game) {
 	rl.ClearBackground(rl.BLACK)
 
-	player_update()
+	player_update(game)
 
-	render_player()
-	render_hud()
+	render_player(game)
+	render_hud(game)
 }
 
 game_init :: proc(game: ^Game) {
+	game.sw = f32(rl.GetScreenWidth())
+	game.sh = f32(rl.GetScreenHeight())
+
 	game.battle = Battle{}
 	game.player = Ship{
 		accel = 400,
@@ -67,13 +69,7 @@ game_init :: proc(game: ^Game) {
 	game.rem_pop = 8_700_314_042
 }
 
-init :: proc() {
-	sw, sh = f32(rl.GetScreenWidth()), f32(rl.GetScreenHeight())
-
-	game_init(&game)
-}
-
-player_update :: proc() {
+player_update :: proc(game: ^Game) {
 	dt := rl.GetFrameTime()
 	dir := rl.Vector2{ 0, 0 }
 	if rl.IsKeyDown(rl.KeyboardKey.UP)    { dir.y -= 1 }
@@ -96,14 +92,14 @@ player_update :: proc() {
 	game.player.pos += (game.player.vel * dt)
 }
 
-render_hud :: proc() {
+render_hud :: proc(game: ^Game) {
 	segment_digit_height: f32 = 28
 	segment_size: f32 = 3
 
 	label      := "score"
 	label_c    := strings.clone_to_cstring(label, context.temp_allocator)
 	label_size := rl.MeasureTextEx(hud_font, label_c, f32(hud_font_size), 0)
-	label_x    := (sw/2) - (label_size.x/2)
+	label_x    := (game.sw/2) - (label_size.x/2)
 	rl.DrawTextEx(hud_font, label_c, rl.Vector2{label_x, segment_digit_height}, f32(hud_font_size), 0, rl.BLUE)
 	qv.seven_segment_display(
 		game.player.score, MAX_SCORE_DIGITS,
@@ -129,7 +125,7 @@ render_hud :: proc() {
 	label      = "wave"
 	label_c    = strings.clone_to_cstring(label, context.temp_allocator)
 	label_size = rl.MeasureTextEx(hud_font, label_c, f32(hud_font_size), 0)
-	label_x    = sw-label_size.x-60
+	label_x    = game.sw-label_size.x-60
 	rl.DrawTextEx(hud_font, label_c, rl.Vector2{label_x, segment_digit_height}, f32(hud_font_size), 0, rl.BLUE)
 	qv.seven_segment_display(
 		game.battle.wave, 3,
@@ -140,7 +136,7 @@ render_hud :: proc() {
 	)
 }
 
-render_player :: proc() {
+render_player :: proc(game: ^Game) {
 	rl.DrawRectangleV(game.player.pos, game.player.size, game.player.color)
 }
 
@@ -174,11 +170,12 @@ main :: proc() {
     hud_font = rl.LoadFontEx(strings.clone_to_cstring(hud_font_path, context.temp_allocator), hud_font_size, nil, 0)
     defer rl.UnloadFont(hud_font)
 
-	init()
+	game: Game
+	game_init(&game)
     for !rl.WindowShouldClose() {
 		qv.begin()
 		defer qv.present()
 		
-		do_battle()	
+		do_battle(&game)	
 	}
 }
